@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>AI Job Finder Pro | 14 Skill Modes | Go Dashboard | Batch Processing</title>
+    <!-- Google Fonts + Tailwind + Font Awesome + html2pdf -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        body { background: linear-gradient(135deg, #f5f7fa 0%, #e9eef5 100%); min-height: 100vh; }
+        .glass-card { background: rgba(255,255,255,0.92); backdrop-filter: blur(2px); border-radius: 28px; box-shadow: 0 20px 35px -12px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.5); }
+        .skill-chip { transition: all 0.2s cubic-bezier(0.23, 1, 0.32, 1); cursor: pointer; }
+        .skill-chip.active { transform: scale(0.97); box-shadow: 0 6px 14px rgba(37,99,235,0.25); }
+        .dashboard-stat { transition: transform 0.2s ease; }
+        .dashboard-stat:hover { transform: translateY(-3px); }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 10px; }
+        .job-card { transition: all 0.2s; border-left: 4px solid #3b82f6; }
+        .job-card:hover { transform: translateX(4px); background-color: #f8fafc; }
+        @keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(59,130,246,0.4); } 100% { box-shadow: 0 0 0 12px rgba(59,130,246,0); } }
+        .batch-active { animation: pulse-ring 1.5s infinite; }
+        @media (max-width: 640px) { .skill-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; } .container-padding { padding-left: 1rem; padding-right: 1rem; } }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-10 container-padding">
+        <!-- Header Section with AI Badge -->
+        <div class="text-center mb-10">
+            <div class="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-4 py-1.5 rounded-full text-sm font-semibold mb-3">
+                <i class="fas fa-robot"></i> AI-POWERED JOB ENGINE
+            </div>
+            <h1 class="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-blue-700 to-indigo-700 bg-clip-text text-transparent">AI Job Finder</h1>
+            <p class="text-gray-600 mt-3 max-w-2xl mx-auto">১৪টি স্কিল মোড · গো ড্যাশবোর্ড · ব্যাচ প্রসেসিং · স্মার্ট ম্যাচিং · পিডিএফ রিপোর্ট</p>
+        </div>
+
+        <!-- Go Dashboard Stats (Professional Cards) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
+            <div class="glass-card p-5 dashboard-stat flex items-center justify-between">
+                <div><p class="text-gray-500 text-sm font-medium"><i class="fas fa-chart-line mr-1 text-blue-500"></i> ম্যাচড জবস</p><p id="matchedJobsCount" class="text-3xl font-black text-gray-800">0</p></div>
+                <i class="fas fa-briefcase text-4xl text-blue-200"></i>
+            </div>
+            <div class="glass-card p-5 dashboard-stat flex items-center justify-between">
+                <div><p class="text-gray-500 text-sm font-medium"><i class="fas fa-microchip mr-1 text-green-500"></i> প্রসেসড স্কিল</p><p id="processedSkillsCount" class="text-3xl font-black text-gray-800">0</p></div>
+                <i class="fas fa-cogs text-4xl text-green-200"></i>
+            </div>
+            <div class="glass-card p-5 dashboard-stat flex items-center justify-between">
+                <div><p class="text-gray-500 text-sm font-medium"><i class="fas fa-layer-group mr-1 text-purple-500"></i> ব্যাচ স্ট্যাটাস</p><p id="batchStatusText" class="text-md font-bold text-gray-700"><span class="inline-flex items-center gap-1"><i class="fas fa-check-circle text-green-600"></i> স্ট্যান্ডবাই</span></p></div>
+                <i class="fas fa-database text-4xl text-purple-200"></i>
+            </div>
+            <div class="glass-card p-5 dashboard-stat flex items-center justify-between">
+                <div><p class="text-gray-500 text-sm font-medium"><i class="fas fa-star mr-1 text-amber-500"></i> AI স্কোর AVG</p><p id="avgMatchScore" class="text-3xl font-black text-gray-800">0%</p></div>
+                <i class="fas fa-chart-simple text-4xl text-amber-200"></i>
+            </div>
+        </div>
+
+        <!-- 14 Skill Modes (Professional Grid) -->
+        <div class="glass-card p-6 mb-10">
+            <div class="flex flex-wrap justify-between items-center mb-5 border-b border-gray-100 pb-3">
+                <h2 class="text-xl font-bold text-gray-800"><i class="fas fa-microchip text-blue-600 mr-2"></i> ১৪টি স্কিল মোড · AI সাজেশন</h2>
+                <button id="clearSkillsBtn" class="text-sm text-gray-500 hover:text-red-500 transition"><i class="fas fa-eraser"></i> ক্লিয়ার অল</button>
+            </div>
+            <div class="skill-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3" id="skillsContainer"></div>
+        </div>
+
+        <!-- Action Buttons : Batch + PDF + Export -->
+        <div class="flex flex-wrap gap-4 mb-10">
+            <button id="batchProcessBtn" class="flex-1 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white px-5 py-3.5 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-semibold"><i class="fas fa-layer-group"></i> ব্যাচ প্রসেসিং (14 স্কিল)</button>
+            <button id="generatePdfBtn" class="flex-1 bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 text-white px-5 py-3.5 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-semibold"><i class="fas fa-file-pdf"></i> পিডিএফ রিপোর্ট</button>
+            <button id="exportJsonBtn" class="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-5 py-3.5 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-semibold"><i class="fas fa-download"></i> JSON এক্সপোর্ট</button>
+        </div>
+
+        <!-- AI Job Results Section -->
+        <div class="glass-card p-6">
+            <div class="flex justify-between items-center flex-wrap gap-2 mb-4">
+                <h2 class="text-xl font-bold text-gray-800"><i class="fas fa-bolt text-yellow-500 mr-2"></i> AI র‍্যাংকিং · পার্সোনালাইজড জবস</h2>
+                <span class="text-xs bg-gray-100 px-3 py-1 rounded-full text-gray-600"><i class="fas fa-brain"></i> ক্লড-অ্যালগরিদম</span>
+            </div>
+            <div id="jobResults" class="space-y-3 max-h-[500px] overflow-y-auto pr-1"></div>
+            <div id="loadingIndicator" class="hidden flex-col items-center justify-center py-10">
+                <div class="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+                <p class="mt-3 text-gray-600 font-medium">AI বিশ্লেষণ করছে ম্যাচিং স্কোর...</p>
+            </div>
+        </div>
+
+        <!-- Footer Note -->
+        <div class="text-center mt-8 text-gray-400 text-xs">⚡ গো ড্যাশবোর্ড · ১৪টি অ্যাকটিভ মোড · পিডিএফ জেনারেশন · ব্যাচ প্রসেসিং এনজিন</div>
+    </div>
+
+    <script>
+        // ----------------------------- 14 SKILL MODES (ENHANCED) -----------------------------
+        const SKILL_MODES = [
+            "Python", "JavaScript", "Go", "React", "Node.js", "Machine Learning", "Data Science",
+            "Cloud (AWS)", "DevOps", "Kubernetes", "SQL", "UI/UX", "Cybersecurity", "Blockchain"
+        ];
+
+        // ENHANCED JOB DATABASE (realistic)
+        const JOB_DATABASE = [
+            { id: 1, title: "Senior Backend Engineer (Go)", company: "Google", salary: "$140k - $185k", location: "Remote/US", skills: ["Go", "SQL", "Kubernetes"], level: "Senior", equity: true },
+            { id: 2, title: "Full Stack React Developer", company: "Meta", salary: "$130k - $170k", location: "Hybrid", skills: ["React", "JavaScript", "Node.js"], level: "Mid-Senior", equity: false },
+            { id: 3, title: "Machine Learning Engineer", company: "OpenAI", salary: "$160k - $220k", location: "Remote", skills: ["Machine Learning", "Python", "Data Science"], level: "Expert", equity: true },
+            { id: 4, title: "Cloud Architect", company: "Amazon AWS", salary: "$150k - $195k", location: "Seattle/Remote", skills: ["Cloud (AWS)", "DevOps", "Kubernetes"], level: "Lead", equity: true },
+            { id: 5, title: "Cybersecurity Lead", company: "CrowdStrike", salary: "$135k - $175k", location: "Remote", skills: ["Cybersecurity", "Cloud (AWS)"], level: "Senior", equity: false },
+            { id: 6, title: "Data Scientist", company: "Netflix", salary: "$145k - $200k", location: "Los Gatos", skills: ["Data Science", "SQL", "Python"], level: "Senior", equity: true },
+            { id: 7, title: "Product Designer (UI/UX)", company: "Airbnb", salary: "$120k - $155k", location: "Remote US", skills: ["UI/UX"], level: "Mid", equity: false },
+            { id: 8, title: "Blockchain Protocol Dev", company: "Coinbase", salary: "$150k - $210k", location: "Remote", skills: ["Blockchain", "Go", "Node.js"], level: "Senior", equity: true },
+            { id: 9, title: "DevOps Engineer (K8s)", company: "Spotify", salary: "$125k - $165k", location: "Stockholm/Remote", skills: ["DevOps", "Kubernetes", "Cloud (AWS)"], level: "Mid-Senior", equity: false },
+            { id: 10, title: "Node.js Backend Dev", company: "LinkedIn", salary: "$130k - $160k", location: "Sunnyvale", skills: ["Node.js", "JavaScript", "SQL"], level: "Mid", equity: false },
+            { id: 11, title: "AI Research Scientist", company: "DeepMind", salary: "$180k - $250k", location: "London/Remote", skills: ["Machine Learning", "Python", "Data Science"], level: "Lead", equity: true },
+            { id: 12, title: "React Native Engineer", company: "Uber", salary: "$125k - $160k", location: "SF/Remote", skills: ["React", "JavaScript"], level: "Mid", equity: false }
+        ];
+
+        // State
+        let selectedSkillsSet = new Set();
+        let currentRankedJobs = [];
+        let batchRunning = false;
+
+        // DOM elements
+        const skillsContainer = document.getElementById("skillsContainer");
+        const jobResultsDiv = document.getElementById("jobResults");
+        const loadingDiv = document.getElementById("loadingIndicator");
+        const matchedJobsSpan = document.getElementById("matchedJobsCount");
+        const processedSkillsSpan = document.getElementById("processedSkillsCount");
+        const batchStatusSpan = document.getElementById("batchStatusText");
+        const avgMatchSpan = document.getElementById("avgMatchScore");
+
+        // Helper: Update Dashboard UI
+        function updateDashboardUI() {
+            matchedJobsSpan.innerText = currentRankedJobs.length;
+            processedSkillsSpan.innerText = selectedSkillsSet.size;
+            if (currentRankedJobs.length > 0) {
+                let avg = currentRankedJobs.reduce((sum, job) => sum + job.matchPercent, 0) / currentRankedJobs.length;
+                avgMatchSpan.innerText = Math.round(avg) + "%";
+            } else {
+                avgMatchSpan.innerText = "0%";
+            }
+        }
+
+        // Core AI Matching Algorithm (weighted skill match + bonus for seniority)
+        function computeMatches() {
+            if (selectedSkillsSet.size === 0) {
+                currentRankedJobs = [];
+                updateJobResultsUI();
+                updateDashboardUI();
+                return;
+            }
+            const ranked = JOB_DATABASE.map(job => {
+                let matchCount = 0;
+                let totalWeight = job.skills.length;
+                for (let skill of job.skills) {
+                    if (selectedSkillsSet.has(skill)) matchCount++;
+                }
+                let basePercent = (matchCount / totalWeight) * 100;
+                // bonus: if skill set contains "Go" and job title includes Go => +5%
+                if (selectedSkillsSet.has("Go") && job.title.includes("Go")) basePercent += 5;
+                if (selectedSkillsSet.has("Machine Learning") && job.title.includes("ML")) basePercent += 6;
+                let finalPercent = Math.min(100, basePercent);
+                return { ...job, matchPercent: Math.round(finalPercent), matchCount: matchCount };
+            }).filter(job => job.matchCount > 0).sort((a, b) => b.matchPercent - a.matchPercent);
+            
+            currentRankedJobs = ranked;
+            updateJobResultsUI();
+            updateDashboardUI();
+        }
+
+        function updateJobResultsUI() {
+            if (!currentRankedJobs.length) {
+                jobResultsDiv.innerHTML = `<div class="text-center py-12 text-gray-400 bg-gray-50 rounded-2xl"><i class="fas fa-search text-4xl mb-3 block"></i> কোন স্কিল সিলেক্ট করুন অথবা ব্যাচ প্রসেসিং চালান</div>`;
+                return;
+            }
+            jobResultsDiv.innerHTML = currentRankedJobs.map(job => `
+                <div class="job-card bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all">
+                    <div class="flex flex-wrap justify-between items-start gap-2">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h3 class="font-bold text-gray-800 text-lg">${job.title}</h3>
+                                <span class="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full font-semibold">${job.matchPercent}% ম্যাচ</span>
+                                ${job.equity ? '<span class="bg-amber-100 text-amber-700 text-xs px-2 py-0.5 rounded-full"><i class="fas fa-chart-line"></i> ইকুইটি</span>' : ''}
+                            </div>
+                            <p class="text-gray-600 text-sm mt-1"><i class="fas fa-building"></i> ${job.company} · <i class="fas fa-map-marker-alt"></i> ${job.location} · 💰 ${job.salary}</p>
+                            <div class="flex flex-wrap gap-1 mt-2">
+                                ${job.skills.map(s => `<span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">${s}</span>`).join('')}
+                            </div>
+                        </div>
+                        <button class="apply-mock text-blue-600 border border-blue-300 px-4 py-1.5 rounded-full text-sm hover:bg-blue-50 transition"><i class="fas fa-paper-plane"></i> আবেদন</button>
+                    </div>
+                </div>
+            `).join("");
+            // attach apply mock events
+            document.querySelectorAll('.apply-mock').forEach(btn => {
+                btn.addEventListener('click', () => alert('✅ ডেমো: AI আপনার প্রোফাইল ফরোয়ার্ড করেছে!'));
+            });
+        }
+
+        // Render Skill Chips (14 Modes)
+        function renderSkillModes() {
+            skillsContainer.innerHTML = "";
+            SKILL_MODES.forEach(skill => {
+                const isActive = selectedSkillsSet.has(skill);
+                const chip = document.createElement("button");
+                chip.className = `skill-chip text-sm py-2.5 px-3 rounded-xl font-medium transition-all flex items-center justify-center gap-1 ${isActive ? 'active bg-blue-600 text-white shadow-md' : 'bg-white text-gray-700 border border-gray-200 hover:border-blue-300 hover:bg-blue-50'}`;
+                chip.innerHTML = isActive ? `<i class="fas fa-check-circle text-xs"></i> ${skill}` : skill;
+                chip.onclick = (e) => {
+                    e.preventDefault();
+                    if (selectedSkillsSet.has(skill)) selectedSkillsSet.delete(skill);
+                    else selectedSkillsSet.add(skill);
+                    renderSkillModes();
+                    computeMatches();
+                };
+                skillsContainer.appendChild(chip);
+            });
+        }
+
+        // Batch Processing: Simulate AI processing all 14 skills sequentially with progress
+        async function runBatchProcessing() {
+            if (batchRunning) return;
+            batchRunning = true;
+            batchStatusSpan.innerHTML = `<span class="inline-flex items-center gap-1"><i class="fas fa-spinner fa-pulse text-indigo-600"></i> প্রসেসিং...</span>`;
+            loadingDiv.classList.remove("hidden");
+            
+            // collect all jobs from all skills
+            let aggregatedJobsMap = new Map();
+            for (let i = 0; i < SKILL_MODES.length; i++) {
+                const skill = SKILL_MODES[i];
+                batchStatusSpan.innerHTML = `<span class="inline-flex items-center gap-1"><i class="fas fa-cog fa-spin"></i> বিশ্লেষণ: ${skill} (${i+1}/${SKILL_MODES.length})</span>`;
+                // Simulate AI delay
+                await new Promise(r => setTimeout(r, 60));
+                const jobsForSkill = JOB_DATABASE.filter(job => job.skills.includes(skill));
+                jobsForSkill.forEach(job => {
+                    if (!aggregatedJobsMap.has(job.id)) {
+                        aggregatedJobsMap.set(job.id, { ...job, matchPercent: 82, matchCount: 1 });
+                    } else {
+                        let existing = aggregatedJobsMap.get(job.id);
+                        existing.matchPercent = Math.min(100, existing.matchPercent + 5);
+                        aggregatedJobsMap.set(job.id, existing);
+                    }
+                });
+            }
+            currentRankedJobs = Array.from(aggregatedJobsMap.values()).sort((a,b)=>b.matchPercent - a.matchPercent);
+            updateJobResultsUI();
+            updateDashboardUI();
+            loadingDiv.classList.add("hidden");
+            batchStatusSpan.innerHTML = `<span class="inline-flex items-center gap-1"><i class="fas fa-check-circle text-green-600"></i> ব্যাচ সম্পন্ন (১৪ স্কিল প্রসেসড)</span>`;
+            batchRunning = false;
+            // add a temporary highlight
+            setTimeout(() => {
+                if(!batchRunning) batchStatusSpan.innerHTML = `<span class="inline-flex items-center gap-1"><i class="fas fa-check-circle text-green-600"></i> প্রস্তুত</span>`;
+            }, 3000);
+        }
+
+        // PDF GENERATION (professional full report)
+        function generateFullPDF() {
+            if (currentRankedJobs.length === 0 && selectedSkillsSet.size === 0) {
+                alert("❌ পিডিএফ জেনারেট করতে কমপক্ষে একটি স্কিল সিলেক্ট করুন অথবা ব্যাচ প্রসেসিং চালান।");
+                return;
+            }
+            const reportElement = document.createElement('div');
+            reportElement.style.padding = '20px';
+            reportElement.style.fontFamily = 'Inter, sans-serif';
+            reportElement.innerHTML = `
+                <div style="text-align:center; border-bottom:2px solid #3b82f6; padding-bottom:15px; margin-bottom:20px;">
+                    <h1 style="color:#1e3a8a;">🤖 AI Job Finder Report</h1>
+                    <p>জেনারেটেড: ${new Date().toLocaleString()} | স্কিল সিলেক্টেড: ${selectedSkillsSet.size || 'Batch Mode'}</p>
+                </div>
+                <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:20px;">
+                    <div style="background:#f0f9ff; padding:12px; border-radius:16px;"><strong>ম্যাচড জবস</strong><br>${currentRankedJobs.length}</div>
+                    <div style="background:#f0f9ff; padding:12px; border-radius:16px;"><strong>এভারেজ ম্যাচ স্কোর</strong><br>${avgMatchSpan.innerText}</div>
+                </div>
+                <h2 style="font-size:20px;">🎯 টপ ম্যাচিং চাকরি</h2>
+                ${currentRankedJobs.slice(0,10).map(job => `
+                    <div style="border-left:4px solid #2563eb; background:#fafcff; margin-bottom:12px; padding:12px; border-radius:12px;">
+                        <strong>${job.title}</strong> at ${job.company}  |  ম্যাচ: ${job.matchPercent}%<br>
+                        বেতন: ${job.salary}  | লোকেশন: ${job.location}<br>
+                        দরকারি স্কিল: ${job.skills.join(', ')}
+                    </div>
+                `).join('')}
+                <p style="margin-top:30px; font-size:12px; color:gray;">AI Job Finder Pro - ক্লড কোড বেইজড সিস্টেম</p>
+            `;
+            const opt = { margin: [0.5,0.5,0.5,0.5], filename: `AI_JobReport_${Date.now()}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } };
+            html2pdf().set(opt).from(reportElement).save();
+        }
+
+        // Export JSON (professional)
+        function exportToJSON() {
+            if (currentRankedJobs.length === 0) { alert("কোন ডেটা নেই, আগে স্কিল সিলেক্ট করুন বা ব্যাচ রান করুন।"); return; }
+            const dataStr = JSON.stringify({ generatedAt: new Date().toISOString(), totalMatches: currentRankedJobs.length, jobs: currentRankedJobs }, null, 2);
+            const blob = new Blob([dataStr], {type: "application/json"});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `job_matches_${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Clear all skills
+        function clearAllSkills() {
+            selectedSkillsSet.clear();
+            renderSkillModes();
+            computeMatches();
+        }
+
+        // Event Listeners
+        document.getElementById("batchProcessBtn").addEventListener("click", runBatchProcessing);
+        document.getElementById("generatePdfBtn").addEventListener("click", generateFullPDF);
+        document.getElementById("exportJsonBtn").addEventListener("click", exportToJSON);
+        document.getElementById("clearSkillsBtn").addEventListener("click", clearAllSkills);
+
+        // init
+        renderSkillModes();
+        computeMatches();
+    </script>
+</body>
+</html>
